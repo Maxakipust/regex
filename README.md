@@ -1,1 +1,14 @@
 # regex
+A very basic regex engine
+
+as of right now the syntax looks like:
+```
+r -> ?(r)
+r -> +(r)
+r -> *(r)
+r -> |(r)
+r -> (r)
+r -> &(r)
+r -> "anything"
+```
+The end goal is to be able to generate a DFA from a regex using regex derivatives and then evaluate the DFA. I may also try the less efficent approach of converting the regex to an NFA and then the NFA to a DFA 
