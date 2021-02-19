@@ -11,10 +11,10 @@ public class Lexer {
             return new Token.TokEOF();
         }
         switch (source.charAt(index)){
-            case '?':
-                return lexQuestionMark();
-            case '+':
-                return lexPlus();
+//            case '?':
+//                return lexQuestionMark();
+//            case '+':
+//                return lexPlus();
             case '*':
                 return lexAsterisk();
             case '|':
@@ -75,14 +75,14 @@ public class Lexer {
         return new Token.TokAsterisk();
     }
 
-    private Token lexPlus() {
-        index++;
-        return new Token.TokPlus();
-    }
-
-    private Token lexQuestionMark() {
-        index++;
-        return new Token.TokQuestionMark();
-    }
+//    private Token lexPlus() {
+//        index++;
+//        return new Token.TokPlus();
+//    }
+//
+//    private Token lexQuestionMark() {
+//        index++;
+//        return new Token.TokQuestionMark();
+//    }
 
 }

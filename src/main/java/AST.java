@@ -1,57 +1,12 @@
+import com.google.gson.annotations.SerializedName;
+
 public abstract class AST<T> {
-    public boolean accepting = false;
-    public abstract AST derivative(String str);
+    public abstract boolean acceptsEmpty();
     public abstract void accept(Visitor visitor);
+    public abstract AST derivative(String withRespectTo);
 
-    public static class ZeroOrOne extends AST{
-        AST child;
-        ZeroOrOne(AST child){
-            this.child = child;
-            accepting = true;
-        }
-
-        @Override
-        public String toString() {
-            return "ZeroOrOne{" +
-                    "child=" + child +
-                    '}';
-        }
-
-        @Override
-        public AST derivative(String str) {
-            return null;
-        }
-
-        @Override
-        public void accept(Visitor visitor) {
-            visitor.visitZeroOrOne(this);
-        }
-    }
-    public static class OneOrMore extends AST{
-        AST child;
-
-        @Override
-        public String toString() {
-            return "OneOrMore{" +
-                    "child=" + child +
-                    '}';
-        }
-
-        OneOrMore(AST child){
-            this.child = child;
-        }
-
-        @Override
-        public AST derivative(String str) {
-            return new ZeroOrMore(child);
-        }
-
-        @Override
-        public void accept(Visitor visitor) {
-            visitor.visitOneOrMore(this);
-        }
-    }
     public static class ZeroOrMore extends AST{
+        @SerializedName(value="ZeroOrMore")
         AST child;
 
         @Override
@@ -66,17 +21,25 @@ public abstract class AST<T> {
         }
 
         @Override
-        public AST derivative(String str) {
-            return new AST.And(child.derivative(str), new AST.ZeroOrMore(child));
+        public boolean acceptsEmpty() {
+            return true;
         }
 
         @Override
         public void accept(Visitor visitor) {
             visitor.visitZeroOrMore(this);
         }
+
+        @Override
+        public AST derivative(String withRespectTo) {
+            return new AST.And(child.derivative(withRespectTo), new ZeroOrMore(child));
+        }
     }
     public static class Or extends AST{
-        AST left, right;
+        @SerializedName(value="OrL")
+        AST left;
+        @SerializedName(value="OrR")
+        AST right;
 
         @Override
         public String toString() {
@@ -92,43 +55,26 @@ public abstract class AST<T> {
         }
 
         @Override
-        public AST derivative(String str) {
-            AST leftDer = left == null ? null : left.derivative(str);
-            AST rightDer = right == null ? null : right.derivative(str);
-            return new AST.Or(leftDer, rightDer);
+        public boolean acceptsEmpty() {
+            return left.acceptsEmpty() || right.acceptsEmpty();
         }
 
         @Override
         public void accept(Visitor visitor) {
             visitor.visitOr(this);
         }
-    }
-    public static class Group extends AST{
-        AST child;
 
         @Override
-        public String toString() {
-            return "Group{" +
-                    "child=" + child +
-                    '}';
-        }
-
-        Group(AST child){
-            this.child = child;
-        }
-
-        @Override
-        public AST derivative(String str) {
-            return this.child.derivative(str);
-        }
-
-        @Override
-        public void accept(Visitor visitor) {
-            visitor.visitGroup(this);
+        public AST derivative(String withRespectTo) {
+            return new Or(left.derivative(withRespectTo), right.derivative(withRespectTo));
         }
     }
+
     public static class And extends AST{
-        AST left, right;
+        @SerializedName(value="AndL")
+        AST left;
+        @SerializedName(value="AndR")
+        AST right;
 
         @Override
         public String toString() {
@@ -144,19 +90,26 @@ public abstract class AST<T> {
         }
 
         @Override
-        public AST derivative(String str) {
-            if(left.derivative(str) == null){
-                return right;
-            }
-            return new AST.And(left.derivative(str), right);
+        public boolean acceptsEmpty() {
+            return left.acceptsEmpty() && right.acceptsEmpty();
         }
 
         @Override
         public void accept(Visitor visitor) {
             visitor.visitAnd(this);
         }
+
+        @Override
+        public AST derivative(String withRespectTo) {
+            AST l = left.derivative(withRespectTo);
+            if(left.acceptsEmpty()){
+                return new AST.Or(new AST.And(l, right), right.derivative(withRespectTo));
+            }
+            return new AST.And(l, right);
+        }
     }
     public static class Constant extends AST{
+        @SerializedName(value="Constant")
         String value;
         Constant(String value){
             this.value = value;
@@ -170,17 +123,44 @@ public abstract class AST<T> {
         }
 
         @Override
-        public AST derivative(String str) {
-            if(str.equals(value)){
-                return null;
-            }else{
-                return this;
-            }
+        public boolean acceptsEmpty() {
+            return "".equals(value);
         }
 
         @Override
         public void accept(Visitor visitor) {
             visitor.visitConstant(this);
+        }
+
+        @Override
+        public AST derivative(String withRespectTo) {
+            if(withRespectTo.equals(value)){
+                return new Constant("");
+            }else{
+                return new EmptySet();
+            }
+        }
+    }
+    public static class EmptySet extends AST {
+        String type = "EmptySet";
+        @Override
+        public boolean acceptsEmpty() {
+            return false;
+        }
+
+        @Override
+        public void accept(Visitor visitor) {
+            visitor.visitEmptySet(this);
+        }
+
+        @Override
+        public AST derivative(String withRespectTo) {
+            return new EmptySet();
+        }
+
+        @Override
+        public String toString() {
+            return "EmptySet{}";
         }
     }
 }

@@ -11,18 +11,18 @@ public abstract class Token {
             return "\""+value+"\"";
         }
     }
-    public static class TokQuestionMark extends Token{
-        @Override
-        public String toString() {
-            return "?";
-        }
-    }
-    public static class TokPlus extends Token{
-        @Override
-        public String toString() {
-            return "+";
-        }
-    }
+//    public static class TokQuestionMark extends Token{
+//        @Override
+//        public String toString() {
+//            return "?";
+//        }
+//    }
+//    public static class TokPlus extends Token{
+//        @Override
+//        public String toString() {
+//            return "+";
+//        }
+//    }
     public static class TokAsterisk extends Token{
         @Override
         public String toString() {

@@ -34,17 +34,19 @@ public class Parser {
 
     public AST parse() throws Exception{
         Token t = consume();
-        if(t instanceof Token.TokQuestionMark){
-            expect(new Token.TokOpenParen());
-            AST ret = new AST.ZeroOrOne(parse());
-            expect(new Token.TokCloseParen());
-            return ret;
-        }else if(t instanceof Token.TokPlus){
-            expect(new Token.TokOpenParen());
-            AST ret = new AST.OneOrMore(parse());
-            expect(new Token.TokCloseParen());
-            return ret;
-        }else if(t instanceof Token.TokAsterisk){
+//        if(t instanceof Token.TokQuestionMark){
+//            expect(new Token.TokOpenParen());
+//            AST ret = new AST.ZeroOrOne(parse());
+//            expect(new Token.TokCloseParen());
+//            return ret;
+//        }else
+//        if(t instanceof Token.TokPlus){
+//            expect(new Token.TokOpenParen());
+//            AST ret = new AST.OneOrMore(parse());
+//            expect(new Token.TokCloseParen());
+//            return ret;
+//        }else
+        if(t instanceof Token.TokAsterisk){
             expect(new Token.TokOpenParen());
             AST ret = new AST.ZeroOrMore(parse());
             expect(new Token.TokCloseParen());
@@ -56,11 +58,11 @@ public class Parser {
             AST ret = new AST.Or(left, parse());
             expect(new Token.TokCloseParen());
             return ret;
-        }else if(t instanceof Token.TokOpenParen){
-            expect(new Token.TokOpenParen());
-            AST ret = new AST.Group(parse());
-            expect(new Token.TokCloseParen());
-            return ret;
+//        }else if(t instanceof Token.TokOpenParen){
+//            expect(new Token.TokOpenParen());
+//            AST ret = new AST.Group(parse());
+//            expect(new Token.TokCloseParen());
+//            return ret;
         }else if(t instanceof Token.TokAmpersand){
             expect(new Token.TokOpenParen());
             AST left = parse();

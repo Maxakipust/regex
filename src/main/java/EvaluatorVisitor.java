@@ -8,25 +8,25 @@ public class EvaluatorVisitor implements Visitor{
         return str;
     }
 
-    @Override
-    public void visitZeroOrOne(AST.ZeroOrOne ast) {
-        try {
-            ast.child.accept(this);
-        }catch (RuntimeException ignored){
-        }
-    }
+//    @Override
+//    public void visitZeroOrOne(AST.ZeroOrOne ast) {
+//        try {
+//            ast.child.accept(this);
+//        }catch (RuntimeException ignored){
+//        }
+//    }
 
-    @Override
-    public void visitOneOrMore(AST.OneOrMore ast) {
-        ast.child.accept(this);
-        while(true){
-            try{
-                ast.child.accept(this);
-            }catch (Exception ex){
-                break;
-            }
-        }
-    }
+//    @Override
+//    public void visitOneOrMore(AST.OneOrMore ast) {
+//        ast.child.accept(this);
+//        while(true){
+//            try{
+//                ast.child.accept(this);
+//            }catch (Exception ex){
+//                break;
+//            }
+//        }
+//    }
 
     @Override
     public void visitZeroOrMore(AST.ZeroOrMore ast) {
@@ -48,10 +48,10 @@ public class EvaluatorVisitor implements Visitor{
         }
     }
 
-    @Override
-    public void visitGroup(AST.Group ast) {
-        ast.child.accept(this);
-    }
+//    @Override
+//    public void visitGroup(AST.Group ast) {
+//        ast.child.accept(this);
+//    }
 
     @Override
     public void visitAnd(AST.And ast) {
@@ -61,10 +61,18 @@ public class EvaluatorVisitor implements Visitor{
 
     @Override
     public void visitConstant(AST.Constant ast) {
+        if("".equals(ast.value)){
+            return;
+        }
         if(str.startsWith(ast.value)){
-            str = str.replace(ast.value, "");
+            str = str.replaceFirst(ast.value, "");
         }else {
             throw new RuntimeException("nope");
         }
+    }
+
+    @Override
+    public void visitEmptySet(AST.EmptySet ast) {
+        throw new RuntimeException("nope");
     }
 }
