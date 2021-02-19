@@ -4,7 +4,7 @@ public class Main {
         Parser p = new Parser(l);
         AST ast = p.parse();
         System.out.println(ast);
-        EvaluatorVisitor visitor = new EvaluatorVisitor("123abc444");
+        EvaluatorVisitor visitor = new EvaluatorVisitor("4");
         try {
             ast.accept(visitor);
         }catch (RuntimeException ex){

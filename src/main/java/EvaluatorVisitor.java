@@ -10,11 +10,9 @@ public class EvaluatorVisitor implements Visitor{
 
     @Override
     public void visitZeroOrOne(AST.ZeroOrOne ast) {
-        String temp = str;
         try {
             ast.child.accept(this);
-        }catch (RuntimeException ex){
-            str = temp;
+        }catch (RuntimeException ignored){
         }
     }
 
@@ -22,11 +20,9 @@ public class EvaluatorVisitor implements Visitor{
     public void visitOneOrMore(AST.OneOrMore ast) {
         ast.child.accept(this);
         while(true){
-            String s = str;
             try{
                 ast.child.accept(this);
             }catch (Exception ex){
-                str = s;
                 break;
             }
         }
@@ -35,11 +31,9 @@ public class EvaluatorVisitor implements Visitor{
     @Override
     public void visitZeroOrMore(AST.ZeroOrMore ast) {
         while(true){
-            String s = str;
             try{
                 ast.child.accept(this);
             }catch (RuntimeException ex){
-                str = s;
                 break;
             }
         }
@@ -47,11 +41,9 @@ public class EvaluatorVisitor implements Visitor{
 
     @Override
     public void visitOr(AST.Or ast) {
-        String s = str;
         try{
             ast.left.accept(this);
         }catch (Exception ex){
-            str = s;
             ast.right.accept(this);
         }
     }
