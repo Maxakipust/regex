@@ -3,11 +3,8 @@ A very basic regex engine
 
 as of right now the syntax looks like:
 ```
-r -> ?(r)
-r -> +(r)
 r -> *(r)
 r -> |(r)
-r -> (r)
 r -> &(r)
 r -> "anything"
 ```
