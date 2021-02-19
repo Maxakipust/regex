@@ -1,7 +1,7 @@
-public abstract class AST {
+public abstract class AST<T> {
     public boolean accepting = false;
     public abstract AST derivative(String str);
-    public abstract String accept(String str) throws Exception;
+    public abstract void accept(Visitor visitor);
 
     public static class ZeroOrOne extends AST{
         AST child;
@@ -23,12 +23,8 @@ public abstract class AST {
         }
 
         @Override
-        public String accept(String str) throws Exception{
-            try {
-                return child.accept(str);
-            }catch (Exception ex){
-                return str;
-            }
+        public void accept(Visitor visitor) {
+            visitor.visitZeroOrOne(this);
         }
     }
     public static class OneOrMore extends AST{
@@ -51,17 +47,8 @@ public abstract class AST {
         }
 
         @Override
-        public String accept(String str) throws Exception{
-            String s = str;
-            s = child.accept(s);
-            while(true){
-                try{
-                    s = child.accept(s);
-                }catch (Exception ex){
-                    break;
-                }
-            }
-            return s;
+        public void accept(Visitor visitor) {
+            visitor.visitOneOrMore(this);
         }
     }
     public static class ZeroOrMore extends AST{
@@ -84,16 +71,8 @@ public abstract class AST {
         }
 
         @Override
-        public String accept(String str) throws Exception{
-            String s = str;
-            while(true){
-                try{
-                    s = child.accept(s);
-                }catch (Exception ex){
-                    break;
-                }
-            }
-            return s;
+        public void accept(Visitor visitor) {
+            visitor.visitZeroOrMore(this);
         }
     }
     public static class Or extends AST{
@@ -120,12 +99,8 @@ public abstract class AST {
         }
 
         @Override
-        public String accept(String str) throws Exception{
-            try{
-                return left.accept(str);
-            }catch (Exception ex){
-                return right.accept(str);
-            }
+        public void accept(Visitor visitor) {
+            visitor.visitOr(this);
         }
     }
     public static class Group extends AST{
@@ -148,8 +123,8 @@ public abstract class AST {
         }
 
         @Override
-        public String accept(String str) throws Exception{
-            return child.accept(str);
+        public void accept(Visitor visitor) {
+            visitor.visitGroup(this);
         }
     }
     public static class And extends AST{
@@ -177,9 +152,8 @@ public abstract class AST {
         }
 
         @Override
-        public String accept(String str) throws Exception{
-            String afterLeft = left.accept(str);
-            return right.accept(afterLeft);
+        public void accept(Visitor visitor) {
+            visitor.visitAnd(this);
         }
     }
     public static class Constant extends AST{
@@ -205,12 +179,8 @@ public abstract class AST {
         }
 
         @Override
-        public String accept(String str) throws Exception {
-            if(str.startsWith(value)){
-                return str.replace(value, "");
-            }else {
-                throw new Exception("nope");
-            }
+        public void accept(Visitor visitor) {
+            visitor.visitConstant(this);
         }
     }
 }
