@@ -8,32 +8,14 @@ public class EvaluatorVisitor implements Visitor{
         return str;
     }
 
-//    @Override
-//    public void visitZeroOrOne(AST.ZeroOrOne ast) {
-//        try {
-//            ast.child.accept(this);
-//        }catch (RuntimeException ignored){
-//        }
-//    }
-
-//    @Override
-//    public void visitOneOrMore(AST.OneOrMore ast) {
-//        ast.child.accept(this);
-//        while(true){
-//            try{
-//                ast.child.accept(this);
-//            }catch (Exception ex){
-//                break;
-//            }
-//        }
-//    }
-
     @Override
     public void visitZeroOrMore(AST.ZeroOrMore ast) {
         while(true){
+            String temp = str;
             try{
                 ast.child.accept(this);
             }catch (RuntimeException ex){
+                this.str = temp;
                 break;
             }
         }
@@ -41,17 +23,38 @@ public class EvaluatorVisitor implements Visitor{
 
     @Override
     public void visitOr(AST.Or ast) {
+        String orig = str;
+        String leftStr = null;
+        String rightStr = null;
         try{
             ast.left.accept(this);
-        }catch (Exception ex){
-            ast.right.accept(this);
-        }
-    }
+            leftStr = str;
+            str = orig;
+        }catch (RuntimeException ex){
 
-//    @Override
-//    public void visitGroup(AST.Group ast) {
-//        ast.child.accept(this);
-//    }
+        }
+        try{
+            ast.right.accept(this);
+            rightStr = str;
+            str = orig;
+        }catch (RuntimeException ex){
+
+        }
+        if(rightStr != null){
+            if(leftStr != null){
+                str = leftStr.length() <= rightStr.length() ? leftStr : rightStr;
+                return;
+            }
+            str = rightStr;
+            return;
+        }else{
+            if(leftStr != null){
+                str = leftStr;
+                return;
+            }
+        }
+        throw new RuntimeException("Nope");
+    }
 
     @Override
     public void visitAnd(AST.And ast) {

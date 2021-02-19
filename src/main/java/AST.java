@@ -34,6 +34,8 @@ public abstract class AST<T> {
         public AST derivative(String withRespectTo) {
             return new AST.And(child.derivative(withRespectTo), new ZeroOrMore(child));
         }
+
+
     }
     public static class Or extends AST{
         @SerializedName(value="OrL")
@@ -134,8 +136,8 @@ public abstract class AST<T> {
 
         @Override
         public AST derivative(String withRespectTo) {
-            if(withRespectTo.equals(value)){
-                return new Constant("");
+            if(withRespectTo.startsWith(value) && !"".equals(value)){
+                return new Constant(value.replaceFirst(withRespectTo, ""));
             }else{
                 return new EmptySet();
             }
