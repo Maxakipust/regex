@@ -215,6 +215,40 @@ public abstract class AST<T> {
             return Objects.hash(value);
         }
     }
+
+    public static class Range extends  AST {
+        int start, end;
+
+        public Range(String start, String end){
+            this.start = start.charAt(0);
+            this.end = end.charAt(0);
+        }
+
+        @Override
+        public boolean acceptsEmpty() {
+            return false;
+        }
+
+        @Override
+        public void accept(Visitor visitor) {
+            visitor.visitRange(this);
+        }
+
+        public boolean matchesChar(char ch){
+            return ch >= start && ch <= end;
+        }
+
+        @Override
+        public AST derivative(String withRespectTo) {
+            Character withRespectToStart = withRespectTo.charAt(0);
+            if(matchesChar(withRespectToStart)){
+                return new Constant("");
+            }else{
+                return new EmptySet();
+            }
+        }
+    }
+
     public static class EmptySet extends AST {
         String type = "EmptySet";
         @Override

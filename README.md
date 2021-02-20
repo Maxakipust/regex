@@ -7,6 +7,7 @@ r -> *(r)
 r -> |(a,b)
 r -> &(a,b)
 r -> "anything"
+r -> [a-z]
 ```
 use "" to match the empty string
 

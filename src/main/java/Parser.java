@@ -70,8 +70,10 @@ public class Parser {
             AST ret = new AST.And(left, parse());
             expect(new Token.TokCloseParen());
             return ret;
-        }else if(t instanceof Token.TokConstant){
+        }else if(t instanceof Token.TokConstant) {
             return new AST.Constant(((Token.TokConstant) t).value);
+        }else if(t instanceof Token.TokRange){
+            return new AST.Range(((Token.TokRange) t).start, ((Token.TokRange) t).end);
         } else {
             throw new Exception("parse error");
         }

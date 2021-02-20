@@ -36,4 +36,11 @@ public class FindConstantsVisitor implements Visitor {
     public void visitEmptySet(AST.EmptySet ast) {
 
     }
+
+    @Override
+    public void visitRange(AST.Range ast) {
+        for(int i = ast.start; i <=ast.end; i++){
+            constants.add(Character.toString((char)i));
+        }
+    }
 }

@@ -29,9 +29,28 @@ public class Lexer {
                 return lexAmpersand();
             case ',':
                 return lexComma();
+            case '[':
+                return lexRange();
             default:
                 throw new Exception("invalid symbol at "+index);
         }
+    }
+
+    private Token lexRange(){
+        index ++;
+        char start = source.charAt(index);
+        index++;
+        if(source.charAt(index) != '-'){
+            throw new RuntimeException("expected -");
+        }
+        index++;
+        char end = source.charAt(index);
+        index++;
+        if(source.charAt(index) != ']'){
+            throw new RuntimeException("expected ]");
+        }
+        index++;
+        return new Token.TokRange(Character.toString(start), Character.toString(end));
     }
 
     private Token lexQuote() {

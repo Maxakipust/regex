@@ -75,6 +75,16 @@ public class EvaluatorVisitor implements Visitor{
     }
 
     @Override
+    public void visitRange(AST.Range ast) {
+        char startChar = str.charAt(0);
+        if(ast.matchesChar(startChar)){
+            str = str.substring(1);
+        }else{
+            throw new RuntimeException("nope");
+        }
+    }
+
+    @Override
     public void visitEmptySet(AST.EmptySet ast) {
         throw new RuntimeException("nope");
     }

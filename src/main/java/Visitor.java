@@ -7,4 +7,5 @@ public interface Visitor {
     void visitAnd(AST.And ast);
     void visitConstant(AST.Constant ast);
     void visitEmptySet(AST.EmptySet ast);
+    void visitRange(AST.Range ast);
 }

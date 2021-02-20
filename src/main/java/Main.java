@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main {
 
@@ -18,42 +20,67 @@ public class Main {
         return "".equals(v.getStr());
     }
 
-    public static void main(String[] args) throws Exception {
-        String regex = "*(&(&(|(\"0\",|(\"1\",|(\"2\",|(\"3\",|(\"4\",|(\"5\",|(\"6\",|(\"7\",|(\"8\",\"9\"))))))))),|(\"0\",|(\"1\",|(\"2\",|(\"3\",|(\"4\",|(\"5\",|(\"6\",|(\"7\",|(\"8\",\"9\")))))))))),\",\"))";
-        Random random = new Random();
+    public static String generateStr(Random r){
         StringBuilder str = new StringBuilder();
         for(int i = 0; i<100; i++){
-            String first = Integer.toString(random.nextInt(9));
-            String second = Integer.toString(random.nextInt(9));
-            str.append(first).append(second).append(",");
+            if(r.nextBoolean()) {
+                String first = Integer.toString(r.nextInt(9));
+                str.append(first);
+            }else {
+                int min = 'a';
+                int max = 'z';
+                char ch = (char)(r.nextInt((max - min) + 1) + min);
+                str.append(ch);
+            }
         }
+        return str.toString();
+    }
+
+    public static void main(String[] args) throws Exception {
+        String regex = "*(|([0-9],[a-z]))";
+
+        Random random = new Random();
+
         Lexer l = new Lexer(regex);
         Parser p = new Parser(l);
         AST ast = p.parse();
         System.out.println("regex: "+regex);
-        System.out.println("string: "+ str);
 
         System.out.println("Finished with setup");
         System.out.println("Starting interpreter");
 
         long interpstart = new Date().getTime();
         for(int i = 0; i< 100; i++){
-            runRegex(ast, str.toString());
+            if(!runRegex(ast, generateStr(random))){
+                System.err.println("No match");
+            }
         }
         long interpend = new Date().getTime();
         System.out.println("Interpreter ran in "+(interpend - interpstart) +"ms");
 
-        System.out.println("Compiling to DFA");
-        long compilestart = new Date().getTime();
-        Dfa dfa = new Dfa(ast);
-        long compileend = new Date().getTime();
-        System.out.println("Compile ran in "+(compileend - compilestart) +"ms");
         System.out.println("Running DFA");
         long DFAstart = new Date().getTime();
         for(int i = 0; i< 100; i++){
-            dfa.run(str.toString());
+            String str = generateStr(random);
+            Dfa dfa = new Dfa(ast);
+            if(!dfa.run(str)){
+                System.err.println("no match");
+            }
         }
         long DFAend = new Date().getTime();
         System.out.println("DFA ran in "+(DFAend - DFAstart) +"ms");
+        System.out.println("DFA ran "+ ((double)(interpend-interpstart)/(DFAend-DFAstart))+" times faster");
+        System.out.println("built in regex");
+        long builtInStart = new Date().getTime();
+        for(int i =0; i<100; i++){
+            Pattern pattern = Pattern.compile("[0-9]*");
+            Matcher matcher = pattern.matcher(generateStr(random));
+            boolean found = matcher.find();
+            if(!found)
+                System.err.println("no match");
+        }
+        long builtInEnd = new Date().getTime();
+        System.out.println("built in  ran in "+(builtInEnd - builtInStart) +"ms");
+
     }
 }

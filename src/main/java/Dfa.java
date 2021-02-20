@@ -19,6 +19,7 @@ public class Dfa {
     public class DfaNode{
         AST regex;
         Map<String, DfaNode> transitions = new HashMap<>();
+        Boolean accepting;
 
         public DfaNode(AST regex){
             allNodes.add(this);
@@ -46,21 +47,14 @@ public class Dfa {
             for(DfaNode node: transitions.values()){
                 node.createTransitions();;
             }
-        }
-        public boolean isAccepting(){
-            return regex.acceptsEmpty();
+            accepting = regex.acceptsEmpty();
         }
 
         public boolean run(String str){
-            if("".equals(str)){
-                return isAccepting();
+            if(str.length() == 0){
+                return accepting;
             }
-            for(String cons: transitions.keySet()){
-                if(str.startsWith(cons)){
-                    return transitions.get(cons).run(str.replaceFirst(cons, ""));
-                }
-            }
-            return false;
+            return transitions.get(String.valueOf(str.charAt(0))).run(str.substring(1));
         }
     }
 
