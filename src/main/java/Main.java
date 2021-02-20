@@ -1,6 +1,11 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
 public class Main {
 
     public static boolean runRegex(AST regex, String str){
@@ -14,59 +19,41 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
-        Lexer l = new Lexer("*(&(\"a\",\"b\"))");
+        String regex = "*(&(&(|(\"0\",|(\"1\",|(\"2\",|(\"3\",|(\"4\",|(\"5\",|(\"6\",|(\"7\",|(\"8\",\"9\"))))))))),|(\"0\",|(\"1\",|(\"2\",|(\"3\",|(\"4\",|(\"5\",|(\"6\",|(\"7\",|(\"8\",\"9\")))))))))),\",\"))";
+        Random random = new Random();
+        StringBuilder str = new StringBuilder();
+        for(int i = 0; i<100; i++){
+            String first = Integer.toString(random.nextInt(9));
+            String second = Integer.toString(random.nextInt(9));
+            str.append(first).append(second).append(",");
+        }
+        Lexer l = new Lexer(regex);
         Parser p = new Parser(l);
-        Gson gson = new GsonBuilder().disableHtmlEscaping().create();;
+        AST ast = p.parse();
+        System.out.println("regex: "+regex);
+        System.out.println("string: "+ str);
 
-        AST d0 = p.parse();//"&("<",&(&("a",+(",a")),">"))"
-        System.out.println("d0");
-        System.out.println(runRegex(d0, ">") == false?"success": "fail");
-        System.out.println(runRegex(d0, ",a,a>") == false?"success": "fail");
-        System.out.println(runRegex(d0, "a,a,a>") == false?"success": "fail");
-        System.out.println(runRegex(d0, "<a,a,a>") == true?"success": "fail");
-        System.out.println("");
+        System.out.println("Finished with setup");
+        System.out.println("Starting interpreter");
 
-        AST d1 = d0.derivative("a");//"&(&("a",+(",a")),">")"
-//        System.out.println("d1");
-//        System.out.println(runRegex(d1, ">") == false?"success": "fail");
-//        System.out.println(runRegex(d1, ",a,a>") == false?"success": "fail");
-//        System.out.println(runRegex(d1, "a,a,a>") == true?"success": "fail");
-//        System.out.println(runRegex(d1, "<a,a,a>") == false?"success": "fail");
-//        System.out.println("");
-//
-//        AST d2 = d1.derivative("a");//"&(+(",a"),">")
-//        System.out.println("d2");
-//        System.out.println(runRegex(d2, ">") == true?"success": "fail");
-//        System.out.println(runRegex(d2, ",a,a>") == true?"success": "fail");
-//        System.out.println(runRegex(d2, "a,a,a>") == false?"success": "fail");
-//        System.out.println(runRegex(d2, "<a,a,a>") == false?"success": "fail");
-//        System.out.println("");
-//
-//        AST d3 = d2.derivative(",a");//"&(*(",a"),">")
-//        System.out.println("d3");
-//        System.out.println(runRegex(d3, ">") == true?"success": "fail");
-//        System.out.println(runRegex(d3, ",a,a>") == true?"success": "fail");
-//        System.out.println(runRegex(d3, "a,a,a>") == false?"success": "fail");
-//        System.out.println(runRegex(d3, "<a,a,a>") == false?"success": "fail");
-//        System.out.println("");
-//
-//        AST d4 = d3.derivative(">");//""
-//        System.out.println("d4");
-//        System.out.println(runRegex(d4, ">") == false?"success": "fail");
-//        System.out.println(runRegex(d4, ",a,a>") == false?"success": "fail");
-//        System.out.println(runRegex(d4, "a,a,a>") == false?"success": "fail");
-//        System.out.println(runRegex(d4, "<a,a,a>") == false?"success": "fail");
-//        System.out.println("");
+        long interpstart = new Date().getTime();
+        for(int i = 0; i< 100; i++){
+            runRegex(ast, str.toString());
+        }
+        long interpend = new Date().getTime();
+        System.out.println("Interpreter ran in "+(interpend - interpstart) +"ms");
 
-        System.out.println(gson.toJson(d0));
-//        System.out.println("<");
-        System.out.println(gson.toJson(d1));
-//        System.out.println("a");
-//        System.out.println(gson.toJson(d2));
-//        System.out.println(",a");
-//        System.out.println(gson.toJson(d3));
-//        System.out.println(">");
-//        System.out.println(gson.toJson(d4));
-
+        System.out.println("Compiling to DFA");
+        long compilestart = new Date().getTime();
+        Dfa dfa = new Dfa(ast);
+        long compileend = new Date().getTime();
+        System.out.println("Compile ran in "+(compileend - compilestart) +"ms");
+        System.out.println("Running DFA");
+        long DFAstart = new Date().getTime();
+        for(int i = 0; i< 100; i++){
+            dfa.run(str.toString());
+        }
+        long DFAend = new Date().getTime();
+        System.out.println("DFA ran in "+(DFAend - DFAstart) +"ms");
     }
 }

@@ -1,9 +1,38 @@
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Objects;
+
 public abstract class AST<T> {
     public abstract boolean acceptsEmpty();
     public abstract void accept(Visitor visitor);
     public abstract AST derivative(String withRespectTo);
+
+    private static AST createAnd(AST left, AST right){
+        if(left instanceof Constant){
+            if(((Constant)left).value.equals("")){
+                return right;
+            }
+        }
+        if(right instanceof Constant){
+            if(((Constant)right).value.equals("")){
+                return left;
+            }
+        }
+        if(left instanceof EmptySet || right instanceof EmptySet){
+            return new EmptySet();
+        }
+        return new And(left, right);
+    }
+
+    private static AST createOr(AST left, AST right){
+        if(left instanceof EmptySet){
+            return right;
+        }
+        if(right instanceof EmptySet){
+            return left;
+        }
+        return new Or(left, right);
+    }
 
     public static class ZeroOrMore extends AST{
         @SerializedName(value="ZeroOrMore")
@@ -11,9 +40,7 @@ public abstract class AST<T> {
 
         @Override
         public String toString() {
-            return "ZeroOrMore{" +
-                    "child=" + child +
-                    '}';
+            return "*(" + child + ')';
         }
 
         ZeroOrMore(AST child){
@@ -32,10 +59,21 @@ public abstract class AST<T> {
 
         @Override
         public AST derivative(String withRespectTo) {
-            return new AST.And(child.derivative(withRespectTo), new ZeroOrMore(child));
+            return createAnd(child.derivative(withRespectTo), new ZeroOrMore(child));
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ZeroOrMore that = (ZeroOrMore) o;
+            return Objects.equals(child, that.child);
+        }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(child);
+        }
     }
     public static class Or extends AST{
         @SerializedName(value="OrL")
@@ -45,10 +83,7 @@ public abstract class AST<T> {
 
         @Override
         public String toString() {
-            return "Or{" +
-                    "left=" + left +
-                    ", right=" + right +
-                    '}';
+            return "|(" + left + "," + right + ')';
         }
 
         Or(AST left, AST right){
@@ -68,7 +103,23 @@ public abstract class AST<T> {
 
         @Override
         public AST derivative(String withRespectTo) {
-            return new Or(left.derivative(withRespectTo), right.derivative(withRespectTo));
+            AST dLeft = left.derivative(withRespectTo);
+            AST dRight = right.derivative(withRespectTo);
+
+            return createOr(dLeft, dRight);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Or or = (Or) o;
+            return Objects.equals(left, or.left) && Objects.equals(right, or.right);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(left, right);
         }
     }
 
@@ -80,10 +131,7 @@ public abstract class AST<T> {
 
         @Override
         public String toString() {
-            return "And{" +
-                    "left=" + left +
-                    ", right=" + right +
-                    '}';
+            return "&(" + left + "," + right + ')';
         }
 
         And(AST left, AST right){
@@ -105,9 +153,22 @@ public abstract class AST<T> {
         public AST derivative(String withRespectTo) {
             AST l = left.derivative(withRespectTo);
             if(left.acceptsEmpty()){
-                return new AST.Or(new AST.And(l, right), right.derivative(withRespectTo));
+                return createOr(createAnd(l, right), right.derivative(withRespectTo));
             }
-            return new AST.And(l, right);
+            return createAnd(l, right);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            And and = (And) o;
+            return Objects.equals(left, and.left) && Objects.equals(right, and.right);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(left, right);
         }
     }
     public static class Constant extends AST{
@@ -119,9 +180,7 @@ public abstract class AST<T> {
 
         @Override
         public String toString() {
-            return "Constant{" +
-                    "value='" + value + '\'' +
-                    '}';
+            return "\"" + value + '\"';
         }
 
         @Override
@@ -141,6 +200,19 @@ public abstract class AST<T> {
             }else{
                 return new EmptySet();
             }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Constant constant = (Constant) o;
+            return Objects.equals(value, constant.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
         }
     }
     public static class EmptySet extends AST {
@@ -162,7 +234,20 @@ public abstract class AST<T> {
 
         @Override
         public String toString() {
-            return "EmptySet{}";
+            return "∅";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if(o instanceof EmptySet){
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(type);
         }
     }
 }

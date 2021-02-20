@@ -4,8 +4,8 @@ A very basic regex engine
 as of right now the syntax looks like:
 ```
 r -> *(r)
-r -> |(r)
-r -> &(r)
+r -> |(a,b)
+r -> &(a,b)
 r -> "anything"
 ```
 use "" to match the empty string
