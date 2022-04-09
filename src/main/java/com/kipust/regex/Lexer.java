@@ -1,4 +1,9 @@
-public class Lexer {
+package com.kipust.regex;
+
+/**
+ * Simple and bad Lexer this should probably be rewritten as well as the parser.
+ */
+class Lexer {
     String source = "";
     int index = 0;
 
@@ -10,11 +15,10 @@ public class Lexer {
         if(index >= source.length()){
             return new Token.TokEOF();
         }
+        while(source.charAt(index) == ' '){
+            index++;
+        }
         switch (source.charAt(index)){
-//            case '?':
-//                return lexQuestionMark();
-//            case '+':
-//                return lexPlus();
             case '*':
                 return lexAsterisk();
             case '|':
@@ -23,7 +27,7 @@ public class Lexer {
                 return lexOpenParen();
             case ')':
                 return lexCloseParen();
-            case '"':
+            case '\'':
                 return lexQuote();
             case '&':
                 return lexAmpersand();
@@ -31,8 +35,10 @@ public class Lexer {
                 return lexComma();
             case '[':
                 return lexRange();
+            case '.':
+                return lexWildcard();
             default:
-                throw new Exception("invalid symbol at "+index);
+                throw new Exception("invalid symbol (" + source.charAt(index) +") at "+index);
         }
     }
 
@@ -56,7 +62,7 @@ public class Lexer {
     private Token lexQuote() {
         index++;
         int start = index;
-        while(source.charAt(index) != '"'){
+        while(source.charAt(index) != '\''){
             index++;
         }
         Token t = new Token.TokConstant(source.substring(start, index));
@@ -94,14 +100,8 @@ public class Lexer {
         return new Token.TokAsterisk();
     }
 
-//    private Token lexPlus() {
-//        index++;
-//        return new Token.TokPlus();
-//    }
-//
-//    private Token lexQuestionMark() {
-//        index++;
-//        return new Token.TokQuestionMark();
-//    }
-
+    private Token lexWildcard() {
+        index++;
+        return new Token.TokWildcard();
+    }
 }

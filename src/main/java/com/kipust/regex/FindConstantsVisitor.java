@@ -1,10 +1,14 @@
+package com.kipust.regex;
+
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
-public class FindConstantsVisitor implements Visitor {
-    Set<String> constants = new HashSet<>();
+/**
+ * A visitor to find all the constants that a regex uses.
+ * This is used to construct the DFA.
+ */
+class FindConstantsVisitor implements Visitor {
+    Set<Const> constants = new HashSet<>();
 
     public FindConstantsVisitor(){
 
@@ -29,7 +33,7 @@ public class FindConstantsVisitor implements Visitor {
 
     @Override
     public void visitConstant(AST.Constant ast) {
-        constants.add(ast.value);
+        constants.add(new Const.Value(ast.value));
     }
 
     @Override
@@ -40,7 +44,12 @@ public class FindConstantsVisitor implements Visitor {
     @Override
     public void visitRange(AST.Range ast) {
         for(int i = ast.start; i <=ast.end; i++){
-            constants.add(Character.toString((char)i));
+            constants.add(new Const.Value(Character.toString((char)i)));
         }
+    }
+
+    @Override
+    public void visitWildcard(AST.Wildcard ast) {
+        constants.add(new Const.Wildcard());
     }
 }

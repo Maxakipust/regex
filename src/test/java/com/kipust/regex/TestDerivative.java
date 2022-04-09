@@ -1,3 +1,5 @@
+package com.kipust.regex;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -17,19 +19,14 @@ public class TestDerivative {
 
     private boolean derivative(String regex, String withRespectTo, String test){
         AST ast = createAST(regex);
-        AST d = ast.derivative(withRespectTo);
-        EvaluatorVisitor v = new EvaluatorVisitor(test);
-        try {
-            d.accept(v);
-        }catch (RuntimeException ex){
-            return false;
-        }
-        return "".equals(v.getStr());
+        AST d = ast.derivative(new Const.Value(withRespectTo));
+        Dfa dfa = new Dfa(d);
+        return dfa.run(test).success();
     }
 
     @Test
     public void testConstant(){
-        String regex = "\"a\"";
+        String regex = "'a'";
         assertTrue(derivative(regex, "a", ""));
         assertFalse(derivative(regex, "a", "a"));
         assertFalse(derivative(regex, "a", "b"));
@@ -37,18 +34,18 @@ public class TestDerivative {
 
     @Test
     public void testAnd(){
-        String regex = "&(\"a\",\"b\")";
+        String regex = "&('a','b')";
         assertTrue(derivative(regex, "a", "b"));
         assertFalse(derivative(regex, "a", "ab"));
         assertFalse(derivative(regex, "a", "a"));
-        String regex2 = "&(\"\",\"b\")";
+        String regex2 = "&('','b')";
         assertTrue(derivative(regex2, "b", ""));
         assertFalse(derivative(regex2, "b", "b"));
         assertFalse(derivative(regex2, "b", "a"));
     }
     @Test
     public void testOr(){
-        String regex = "|(\"a\",\"b\")";
+        String regex = "|('a','b')";
         assertTrue(derivative(regex, "a", ""));
         assertTrue(derivative(regex, "b", ""));
         assertFalse(derivative(regex, "a", "a"));
@@ -59,7 +56,7 @@ public class TestDerivative {
 
     @Test
     public void testZeroOrMore(){
-        String regex = "*(&(\"a\",\"b\"))";
+        String regex = "*(&('a','b'))";
         assertTrue(derivative(regex, "a", "b"));
         assertTrue(derivative(regex, "a", "bab"));
         assertFalse(derivative(regex, "a", "ba"));

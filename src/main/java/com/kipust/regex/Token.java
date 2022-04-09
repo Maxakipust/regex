@@ -1,4 +1,6 @@
-public abstract class Token {
+package com.kipust.regex;
+
+abstract class Token {
 
     public static class TokConstant extends Token {
         String value;
@@ -8,7 +10,7 @@ public abstract class Token {
 
         @Override
         public String toString() {
-            return "\""+value+"\"";
+            return "'"+value+"'";
         }
     }
     public static class TokRange extends Token{
@@ -23,18 +25,6 @@ public abstract class Token {
             return "[" + "'" + start + '\'' + "-'" + end + '\'' + ']';
         }
     }
-//    public static class TokQuestionMark extends Token{
-//        @Override
-//        public String toString() {
-//            return "?";
-//        }
-//    }
-//    public static class TokPlus extends Token{
-//        @Override
-//        public String toString() {
-//            return "+";
-//        }
-//    }
     public static class TokAsterisk extends Token{
         @Override
         public String toString() {
@@ -69,6 +59,12 @@ public abstract class Token {
         @Override
         public String toString() {
             return ",";
+        }
+    }
+    public static class TokWildcard extends Token{
+        @Override
+        public String toString() {
+            return ".";
         }
     }
     public static class TokEOF extends Token{
