@@ -29,5 +29,3 @@ It will either be an instance of `AcceptingResult` or `TrashResult`.
 If it is an instance of `AcceptingResult` then that means that the string matched the patter to completion.
 If it is an instance of `TrashResult` then that means that the string failed to match the pattern in some way.
 You can get the exact point where it failed in the string in addition to possible tokens that could have been used where it failed to allow it to take another step.
-
-Have fun pattern matching!
