@@ -1,7 +1,5 @@
 package com.kipust.regex;
 
-import com.kipust.regex.Dfa;
-import com.kipust.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
 import java.io.PrintStream;

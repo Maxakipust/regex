@@ -1,3 +1,5 @@
 .idea
 target
 regex.iml
+build/
+.gradle
